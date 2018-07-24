@@ -45,9 +45,10 @@ export default function transformEs6Classes(ast, j, options) {
 
       const classBody = p.value.body && p.value.body.body;
       if (classBody) {
-        if (containsFlowProps(classBody)) {
-          return;
-        }
+        // console.log(containsFlowProps(classBody));
+        // if (containsFlowProps(classBody)) {
+          // return;
+        // }
 
         annotateConstructor(j, p.value, propIdentifier);
         const index = findIndex(classBody, isStaticPropType);
