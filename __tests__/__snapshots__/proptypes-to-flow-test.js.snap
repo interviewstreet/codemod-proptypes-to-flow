@@ -84,7 +84,9 @@ exports[`React.PropTypes to flow does not touch files with flow Props already de
         created_at?: string,
       };
 
-      class MyComponent extends React.Component {
+      type Props = {};
+
+      class MyComponent extends React.Component<Props> {
         props: Props;
 
         render() {
