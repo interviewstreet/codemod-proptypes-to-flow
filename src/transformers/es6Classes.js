@@ -15,10 +15,6 @@ const isStaticPropType = p => {
   );
 };
 
-// function containsFlowProps(classBody) {
-//   return !!classBody.find(bodyElement => bodyElement.key.name === 'props');
-// }
-
 /**
  * Transforms es2016 components
  * @return true if any components were transformed.
