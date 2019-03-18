@@ -30,7 +30,7 @@ exports[`React.PropTypes to flow adds empty PropTypes (constructor) 1`] = `
       type Props = {};
 
       class PureComponent extends Component<Props> {
-        constructor(props: Props) {
+        constructor(props) {
           super(props);
 
           this.shouldComponentUpdate = PureRenderMixin.shouldComponentUpdate.bind(this);
@@ -54,7 +54,7 @@ exports[`React.PropTypes to flow adds type annotation to \`prop\` parameter in c
       type ComponentProps = {};
 
       export default class Component extends React.Component<ComponentProps> {
-        constructor(props: ComponentProps) {
+        constructor(props) {
           super(props);
         }
 
@@ -65,13 +65,36 @@ exports[`React.PropTypes to flow adds type annotation to \`prop\` parameter in c
       type Component2Props = {};
 
       class Component2 extends React.Component<Component2Props> {
-        constructor(props: Component2Props) {
+        constructor(props) {
           super(props);
         }
 
         componentDidMount() {
         }
       }
+    "
+`;
+
+exports[`React.PropTypes to flow does not touch files with flow Props already declared 1`] = `
+"
+      /* @flow */
+      import React from 'react';
+
+      export type Props = {
+        created_at?: string,
+      };
+
+      class MyComponent extends React.Component {
+        props: Props;
+
+        render() {
+          return (
+            <div />
+          );
+        }
+      }
+
+      export default MyComponent;
     "
 `;
 
@@ -254,7 +277,7 @@ exports[`React.PropTypes to flow transforms PropTypes that are a class property 
       };
 
       export default class Test extends React.Component<Props> {
-        constructor(props: Props) {
+        constructor(props) {
           super(props);
         }
       }
