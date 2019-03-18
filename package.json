@@ -1,6 +1,6 @@
 {
   "name": "codemod-proptypes-to-flow",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A codemod to use Flowtype instead of React.PropTypes",
   "main": "lib/index.js",
   "scripts": {
