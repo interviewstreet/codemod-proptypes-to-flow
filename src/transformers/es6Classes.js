@@ -15,9 +15,9 @@ const isStaticPropType = p => {
   );
 };
 
-function containsFlowProps(classBody) {
-  return !!classBody.find(bodyElement => bodyElement.key.name === 'props');
-}
+// function containsFlowProps(classBody) {
+//   return !!classBody.find(bodyElement => bodyElement.key.name === 'props');
+// }
 
 /**
  * Transforms es2016 components
@@ -47,7 +47,7 @@ export default function transformEs6Classes(ast, j, options) {
       if (classBody) {
         // console.log(containsFlowProps(classBody));
         // if (containsFlowProps(classBody)) {
-          // return;
+        // return;
         // }
 
         annotateConstructor(j, p.value, propIdentifier);
