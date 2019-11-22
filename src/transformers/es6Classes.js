@@ -1,17 +1,22 @@
 import annotateConstructor from '../helpers/annotateConstructor';
 import createTypeAlias from '../helpers/createTypeAlias';
-import findIndex from '../helpers/findIndex';
 import findParentBody from '../helpers/findParentBody';
 import transformProperties from '../helpers/transformProperties';
 import ReactUtils from '../helpers/ReactUtils';
 import removePropTypeImportDeclaration from '../helpers/removePropTypeImport';
 
+import {
+  EXPRESSION_TYPES,
+  NODE_TYPES,
+  IDENTIFIERS,
+} from '../helpers/constants';
+
 const isStaticPropType = p => {
   return (
-    p.type === 'ClassProperty' &&
+    p.type === NODE_TYPES.CLASS_PROPERTY &&
     p.static &&
-    p.key.type === 'Identifier' &&
-    p.key.name === 'propTypes'
+    p.key.type === NODE_TYPES.IDENTIFIER &&
+    p.key.name === IDENTIFIERS.PROPTYPES
   );
 };
 
@@ -34,9 +39,11 @@ export default function transformEs6Classes(ast, j, options) {
   const modifications = reactClassPaths
     .forEach(p => {
       const className = reactUtils.getComponentName(p);
-      const propIdentifier = reactClassPaths.length === 1
-        ? options.propsTypeSuffix
-        : `${className}${options.propsTypeSuffix}`;
+      const propIdentifier =
+        reactClassPaths.length === 1
+          ? options.propsTypeSuffix
+          : `${className}${options.propsTypeSuffix}`;
+
       let properties;
 
       const classBody = p.value.body && p.value.body.body;
@@ -47,8 +54,8 @@ export default function transformEs6Classes(ast, j, options) {
         // }
 
         annotateConstructor(j, p.value, propIdentifier);
-        const index = findIndex(classBody, isStaticPropType);
-        if (typeof index !== 'undefined') {
+        const index = classBody.findIndex(isStaticPropType);
+        if (index !== -1) {
           const classProperty = classBody.splice(index, 1).pop();
           properties = classProperty.value.properties;
         } else {
@@ -58,16 +65,16 @@ export default function transformEs6Classes(ast, j, options) {
           ast
             .find(j.AssignmentExpression, {
               left: {
-                type: 'MemberExpression',
+                type: EXPRESSION_TYPES.MEMBER_EXPRESSION,
                 object: {
                   name: className,
                 },
                 property: {
-                  name: 'propTypes',
+                  name: IDENTIFIERS.PROPTYPES,
                 },
               },
               right: {
-                type: 'ObjectExpression',
+                type: EXPRESSION_TYPES.MEMBER_EXPRESSION,
               },
             })
             .forEach(p => {
@@ -91,8 +98,9 @@ export default function transformEs6Classes(ast, j, options) {
         // This will place ahead of class def
         const { child, body } = findParentBody(p);
         if (body && child) {
-          const bodyIndex = findIndex(body.value, b => b === child);
-          if (bodyIndex) {
+          const bodyValue = body.value || [];
+          const bodyIndex = bodyValue.findIndex(b => b === child);
+          if (bodyIndex !== -1) {
             body.value.splice(bodyIndex, 0, typeAlias);
           }
         }
@@ -103,15 +111,15 @@ export default function transformEs6Classes(ast, j, options) {
   ast
     .find(j.ExpressionStatement, {
       expression: {
-        type: 'AssignmentExpression',
+        type: EXPRESSION_TYPES.ASSIGNMENT_EXPRESSION,
         left: {
-          type: 'MemberExpression',
+          type: EXPRESSION_TYPES.MEMBER_EXPRESSION,
           property: {
-            name: 'propTypes',
+            name: IDENTIFIERS.PROPTYPES,
           },
         },
         right: {
-          type: 'ObjectExpression',
+          type: EXPRESSION_TYPES.OBJECT_EXPRESSION,
         },
       },
     })

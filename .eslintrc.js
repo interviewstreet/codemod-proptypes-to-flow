@@ -11,7 +11,7 @@ module.exports = {
     'prettier',
   ],
   rules: {
-    'comma-dangle': ['error', 'always-multiline'],
+    "comma-dangle": [1, 'only-multiline'],
     'import/order': ['error', {
       'groups': ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
     }],

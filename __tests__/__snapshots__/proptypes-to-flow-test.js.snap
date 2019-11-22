@@ -2,7 +2,7 @@
 
 exports[`React.PropTypes to flow add empty PropTypes (no constructor) 1`] = `
 "
-      /* @flow */
+      // @flow
       import React from 'react';
       import { View } from 'react-native';
 
@@ -22,7 +22,7 @@ exports[`React.PropTypes to flow add empty PropTypes (no constructor) 1`] = `
 
 exports[`React.PropTypes to flow adds empty PropTypes (constructor) 1`] = `
 "
-      /* @flow */
+      // @flow
       import { Component } from 'react';
       import { View } from 'react-native';
       import PureRenderMixin from 'react-addons-pure-render-mixin';
@@ -77,7 +77,7 @@ exports[`React.PropTypes to flow adds type annotation to \`prop\` parameter in c
 
 exports[`React.PropTypes to flow does not touch files with flow Props already declared 1`] = `
 "
-      /* @flow */
+      // @flow
       import React from 'react';
 
       export type Props = {
@@ -113,7 +113,7 @@ exports[`React.PropTypes to flow does not touch non React classes 1`] = `
 
 exports[`React.PropTypes to flow handles block comments 1`] = `
 "
-      /* @flow */
+      // @flow
       import React from 'react';
 
       type Props = {
@@ -130,7 +130,7 @@ exports[`React.PropTypes to flow handles block comments 1`] = `
 
 exports[`React.PropTypes to flow handles functional components with expression body 1`] = `
 "
-      /* @flow */
+      // @flow
       import React from 'react';
       export type Props = { hello: string };
       const MyComponent = (props: Props) => {
@@ -143,7 +143,7 @@ exports[`React.PropTypes to flow handles functional components with expression b
 
 exports[`React.PropTypes to flow handles presence of defaultProps 1`] = `
 "
-      /* @flow */
+      // @flow
       import React from 'react';
 
       type Props = {
@@ -164,7 +164,7 @@ exports[`React.PropTypes to flow handles presence of defaultProps 1`] = `
 
 exports[`React.PropTypes to flow preserves comments 1`] = `
 "
-      /* @flow */
+      // @flow
       import React from 'react';
 
       export type Props = {
@@ -217,7 +217,7 @@ exports[`React.PropTypes to flow preserves comments 1`] = `
 
 exports[`React.PropTypes to flow removes react's 16 PropTypes import 1`] = `
 "
-      /* @flow */
+      // @flow
       import React from 'react';
 
       export type Props = {
@@ -237,7 +237,7 @@ exports[`React.PropTypes to flow removes react's 16 PropTypes import 1`] = `
 
 exports[`React.PropTypes to flow removes react's 16 destructured PropTypes import 1`] = `
 "
-      /* @flow */
+      // @flow
       import React from 'react';
       export type Props = { optionalArray?: Array<any> };
 
@@ -253,7 +253,7 @@ exports[`React.PropTypes to flow removes react's 16 destructured PropTypes impor
 
 exports[`React.PropTypes to flow transforms PropTypes that are a class property 1`] = `
 "
-      /* @flow */
+      // @flow
       import React from 'react';
 
       type Props = {
@@ -288,30 +288,10 @@ exports[`React.PropTypes to flow transforms PropTypes that are a class property 
 
 exports[`React.PropTypes to flow transforms PropTypes that are defined outside of class definition 1`] = `
 "
-      /* @flow */
+      // @flow
       import React from 'react';
 
-      type Props = {
-        optionalArray?: Array<any>,
-        optionalBool?: boolean,
-        optionalFunc?: Function,
-        optionalNumber?: number,
-        optionalObject?: Object,
-        optionalString?: string,
-        optionalNode?: number | string | React.Element | Array<any>,
-        optionalElement?: React.Element,
-        optionalMessage?: Message,
-        optionalEnum?: 'News' | 'Photos',
-        optionalUnion?: string | number | Message,
-        optionalArrayOf?: Array<number>,
-        optionalObjectOf?: Object<number>,
-        optionalObjectWithShape?: {
-          color?: string,
-          fontSize?: number,
-        },
-        requiredFunc: Function,
-        requiredAny: any,
-      };
+      type Props = {};
 
       export default class Test extends React.Component<Props> {
         componentDidMount() {
@@ -322,7 +302,7 @@ exports[`React.PropTypes to flow transforms PropTypes that are defined outside o
 
 exports[`React.PropTypes to flow transforms optional PropTypes prefixed with \`React\` 1`] = `
 "
-      /* @flow */
+      // @flow
       import React from 'react';
 
       export type Props = {
@@ -352,7 +332,7 @@ exports[`React.PropTypes to flow transforms optional PropTypes prefixed with \`R
 
 exports[`React.PropTypes to flow transforms optional PropTypes with no \`React\` prefix 1`] = `
 "
-      /* @flow */
+      // @flow
       import React from 'react';
 
       export type Props = {
@@ -387,7 +367,7 @@ exports[`React.PropTypes to flow transforms optional PropTypes with no \`React\`
 
 exports[`React.PropTypes to flow transforms required PropTypes prefixed with \`React\` 1`] = `
 "
-      /* @flow */
+      // @flow
       /* eslint */
       import React from 'react';
 
@@ -434,7 +414,7 @@ exports[`React.PropTypes to flow transforms required PropTypes prefixed with \`R
 
 exports[`React.PropTypes to flow transforms required PropTypes with no \`React\` prefix 1`] = `
 "
-      /* @flow */
+      // @flow
       import React from 'react';
 
       export type Props = {
@@ -469,11 +449,11 @@ exports[`React.PropTypes to flow transforms required PropTypes with no \`React\`
 
 exports[`React.PropTypes to flow transforms something that just looks like React class 1`] = `
 "
-      /* @flow */
+      // @flow
       import React from 'react';
       import PureComponent from '../PureComponent';
 
-      type Props = { optionalArray?: Array<any> };
+      type Props = {};
 
       class Test extends PureComponent<Props> {
         render() {

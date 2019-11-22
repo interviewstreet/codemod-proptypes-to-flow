@@ -7,7 +7,7 @@ function addFlowComment(j, ast, options) {
 
   const comments = getBodyNode().comments || [];
   const containsFlowComment =
-    comments.filter(e => e.value.indexOf('@flow') !== -1).length > 0;
+    comments.filter(e => e.value.includes('@flow')).length > 0;
 
   if (!containsFlowComment) {
     switch (options.flowComment) {
@@ -24,7 +24,7 @@ function addFlowComment(j, ast, options) {
   getBodyNode().comments = comments;
 }
 
-export default function transformer(file, api, rawOptions) {
+export default function transformer(file, api, rawOptions = {}) {
   const j = api.jscodeshift;
   const root = j(file.source);
 
@@ -37,7 +37,7 @@ export default function transformer(file, api, rawOptions) {
       console.warn('Supported options are "block" and "line".');
       console.warn('Falling back to default: "block".');
     }
-    options.flowComment = 'block';
+    options.flowComment = 'line';
   }
   if (!options.propsTypeSuffix) {
     options.propsTypeSuffix = 'Props';
