@@ -1,3 +1,5 @@
+import { NODE_TYPES } from './constants';
+
 /**
  * Annotates ES2015 Class constructor and Class `props` member
  *
@@ -17,10 +19,10 @@ export default function annotateConstructor(j, clazz, name = 'Props') {
   const classBody = clazz.body && clazz.body.body;
 
   classBody.some(node => {
-    if (node.kind === 'constructor') {
+    if (node.kind === NODE_TYPES.CONSTRUCTOR) {
       // first parameter is always props regardless of name
-      if (node.value.params && node.value.params.length) {
-        node.value.params[0].typeAnnotation = typeAnnotation;
+      if (node.params && node.params.length) {
+        node.params[0].typeAnnotation = typeAnnotation;
       }
 
       return true;

@@ -1,10 +1,11 @@
 /* eslint-env jest */
-const jscodeshift = require('jscodeshift');
+import { withParser } from 'jscodeshift';
+import transform from '../src';
 
-const transform = require('../src/index').default;
+const jscodeshift = withParser('babylon');
 
-const transformString = (source, path = 'test.js') => {
-  return transform({ path, source }, { jscodeshift }, {});
+const transformString = source => {
+  return transform({ source }, { jscodeshift });
 };
 
 describe('React.PropTypes to flow', () => {
@@ -532,7 +533,7 @@ describe('React.PropTypes to flow', () => {
 
   it('does not touch files with flow Props already declared', () => {
     const input = `
-      /* @flow */
+      // @flow
       import React from 'react';
 
       export type Props = {

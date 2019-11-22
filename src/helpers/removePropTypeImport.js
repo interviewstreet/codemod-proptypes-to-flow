@@ -1,10 +1,12 @@
+import { EXPRESSION_TYPES, NODE_TYPES } from './constants';
+
 export default function removePropTypeImport(j, ast) {
   // remove `PropTypes` from import React, { PropTypes } from 'react'
   ast
     .find(j.ImportDeclaration, {
-      type: 'ImportDeclaration',
+      type: EXPRESSION_TYPES.IMPORT_DECLARATION,
       source: {
-        type: 'Literal',
+        type: NODE_TYPES.STRING_LITERAL,
         value: 'react',
       },
     })
@@ -14,9 +16,9 @@ export default function removePropTypeImport(j, ast) {
   // remove whole line import { PropTypes } from 'react'
   ast
     .find(j.ImportDeclaration, {
-      type: 'ImportDeclaration',
+      type: EXPRESSION_TYPES.IMPORT_DECLARATION,
       source: {
-        type: 'Literal',
+        type: NODE_TYPES.STRING_LITERAL,
         value: 'react',
       },
     })
@@ -26,9 +28,9 @@ export default function removePropTypeImport(j, ast) {
   // remove react16 import PropType from 'prop-types' or import { bool } from 'prop-types'
   ast
     .find(j.ImportDeclaration, {
-      type: 'ImportDeclaration',
+      type: EXPRESSION_TYPES.IMPORT_DECLARATION,
       source: {
-        type: 'Literal',
+        type: NODE_TYPES.STRING_LITERAL,
         value: 'prop-types',
       },
     })

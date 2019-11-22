@@ -1,5 +1,11 @@
 import propTypeToFlowType from '../helpers/propTypeToFlowType';
 
+import {
+  NODE_TYPES,
+  IDENTIFIERS,
+  EXPRESSION_TYPES,
+} from '../helpers/constants';
+
 function removeComponentAssignmentPropTypes(ast, j) {
   const componentToPropTypesRemoved = {};
 
@@ -7,13 +13,18 @@ function removeComponentAssignmentPropTypes(ast, j) {
     .find(j.AssignmentExpression, {
       left: {
         property: {
-          name: 'propTypes',
+          name: IDENTIFIERS.PROPTYPES,
         },
       },
     })
     .forEach(p => {
-      const objectName = p.value.left.object.name;
-      const properties = p.value.right.properties;
+      const {
+        left: {
+          object: { name: objectName },
+        },
+        right: { properties },
+      } = p.value;
+
       const flowTypesRemoved = properties.map(property => {
         const t = propTypeToFlowType(j, property.key, property.value);
         t.comments = property.comments;
@@ -30,29 +41,29 @@ function removeComponentAssignmentPropTypes(ast, j) {
 function insertTypeIdentifierInFunction(functionPath, j, typeIdentifier) {
   const functionRoot = functionPath.value.init || functionPath.value;
 
-  const params = functionRoot.params;
+  const { params } = functionRoot;
   const param = params[0];
 
   const newTypeAnnotation = j.typeAnnotation(
     j.genericTypeAnnotation(j.identifier(typeIdentifier), null)
   );
 
-  if (param.type === 'Identifier') {
+  if (param.type === NODE_TYPES.IDENTIFIER) {
     param.typeAnnotation = newTypeAnnotation;
-  } else if (param.type === 'ObjectPattern') {
+  } else if (param.type === NODE_TYPES.OBJECT_PATTERN) {
     // NOTE: something is wrong with recast and objectPatterns...
     // You cannot set typeAnnotation on them, do object spread instead
 
-    const newProps = j.identifier('props');
+    const newProps = j.identifier(IDENTIFIERS.PROPS);
     newProps.typeAnnotation = newTypeAnnotation;
     functionRoot.params = [newProps];
-    const newSpread = j.variableDeclaration('const', [
-      j.variableDeclarator(param, j.identifier('props')),
+    const newSpread = j.variableDeclaration(IDENTIFIERS.CONST, [
+      j.variableDeclarator(param, j.identifier(IDENTIFIERS.PROPS)),
     ]);
 
     // if the body of the function is an expression, we need to construct
     // a block statement to hold the props spread
-    if (functionRoot.body.type === 'BlockStatement') {
+    if (functionRoot.body.type === EXPRESSION_TYPES.BLOCK_STATEMENT) {
       functionRoot.body.body.unshift(newSpread);
     } else {
       const returnExpression = j.returnStatement(functionRoot.body);
@@ -79,9 +90,11 @@ export default function transformFunctionalComponents(ast, j, options) {
 
   components.forEach(c => {
     const flowTypesRemoved = componentToPropTypesRemoved[c];
-    const propIdentifier = components.length === 1
-      ? options.propsTypeSuffix
-      : `${c}${options.propsTypeSuffix}`;
+    const propIdentifier =
+      components.length === 1
+        ? options.propsTypeSuffix
+        : `${c}${options.propsTypeSuffix}`;
+
     const flowTypeProps = j.exportNamedDeclaration(
       j.typeAlias(
         j.identifier(propIdentifier),
@@ -95,7 +108,8 @@ export default function transformFunctionalComponents(ast, j, options) {
         id: { name: c },
       })
       .forEach(f => {
-        const insertNode = f.parent.node.type === 'Program' ? f : f.parent;
+        const insertNode =
+          f.parent.node.type === NODE_TYPES.PROGRAM ? f : f.parent;
         insertNode.insertBefore(flowTypeProps);
         insertTypeIdentifierInFunction(f, j, propIdentifier);
       });
@@ -105,9 +119,10 @@ export default function transformFunctionalComponents(ast, j, options) {
         id: { name: c },
       })
       .forEach(f => {
-        const insertNode = f.parent.parent.node.type === 'Program'
-          ? f.parent
-          : f.parent.parent;
+        const insertNode =
+          f.parent.parent.node.type === NODE_TYPES.PROGRAM
+            ? f.parent
+            : f.parent.parent;
         insertNode.insertBefore(flowTypeProps);
         insertTypeIdentifierInFunction(f, j, propIdentifier);
       });

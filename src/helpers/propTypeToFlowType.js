@@ -1,3 +1,15 @@
+import {
+  getPropTypeExpression,
+  propTypeToFlowTypeMapper,
+  propTypeToFlowTypeTransform,
+} from './propTypeToFlowMapper';
+
+import {
+  EXPRESSION_TYPES,
+  NODE_TYPES,
+  PROPTYPES_IDENTIFIERS,
+} from './constants';
+
 /**
  * Handles transforming a React.PropType to an equivalent flowtype
  */
@@ -12,7 +24,10 @@ export default function propTypeToFlowType(j, key, value) {
     let required = false;
     let node = inputNode;
 
-    if (inputNode.property && inputNode.property.name === 'isRequired') {
+    if (
+      inputNode.property &&
+      inputNode.property.name === PROPTYPES_IDENTIFIERS.IS_REQUIRED
+    ) {
       required = true;
       node = inputNode.object;
     }
@@ -23,116 +38,45 @@ export default function propTypeToFlowType(j, key, value) {
     };
   };
 
-  /**
-   * Gets the PropType MemberExpression without `React` namespace
-   */
-  const getPropTypeExpression = inputNode => {
-    if (
-      inputNode.object &&
-      inputNode.object.object &&
-      inputNode.object.object.name === 'React'
-    ) {
-      return j.memberExpression(inputNode.object.property, inputNode.property);
-    } else if (inputNode.object && inputNode.object.name === 'React') {
-      return inputNode.property;
-    }
-    return inputNode;
-  };
+  const TRANSFORM_MAP = propTypeToFlowTypeMapper(j);
 
-  const TRANSFORM_MAP = {
-    any: j.anyTypeAnnotation(),
-    bool: j.booleanTypeAnnotation(),
-    func: j.genericTypeAnnotation(j.identifier('Function'), null),
-    number: j.numberTypeAnnotation(),
-    object: j.genericTypeAnnotation(j.identifier('Object'), null),
-    string: j.stringTypeAnnotation(),
-    str: j.stringTypeAnnotation(),
-    array: j.genericTypeAnnotation(
-      j.identifier('Array'),
-      j.typeParameterInstantiation([j.anyTypeAnnotation()])
-    ),
-    element: j.genericTypeAnnotation(
-      j.qualifiedTypeIdentifier(j.identifier('React'), j.identifier('Element')),
-      null
-    ),
-    node: j.unionTypeAnnotation([
-      j.numberTypeAnnotation(),
-      j.stringTypeAnnotation(),
-      j.genericTypeAnnotation(
-        j.qualifiedTypeIdentifier(
-          j.identifier('React'),
-          j.identifier('Element')
-        ),
-        null
-      ),
-      j.genericTypeAnnotation(
-        j.identifier('Array'),
-        j.typeParameterInstantiation([j.anyTypeAnnotation()])
-      ),
-    ]),
-  };
   let returnValue;
 
   const expressionWithoutRequired = getExpressionWithoutRequired(value);
-  const required = expressionWithoutRequired.required;
-  const node = expressionWithoutRequired.node;
+  const { node, required } = expressionWithoutRequired;
 
   // Check for React namespace for MemberExpressions (i.e. React.PropTypes.string)
   if (node.object) {
-    node.object = getPropTypeExpression(node.object);
+    node.object = getPropTypeExpression(j, node.object);
   } else if (node.callee) {
-    node.callee = getPropTypeExpression(node.callee);
+    node.callee = getPropTypeExpression(j, node.callee);
   }
 
-  if (node.type === 'Literal') {
-    returnValue = j.stringLiteralTypeAnnotation(node.value, node.raw);
-  } else if (node.type === 'MemberExpression') {
-    returnValue = TRANSFORM_MAP[node.property.name];
-  } else if (node.type === 'CallExpression') {
-    // instanceOf(), arrayOf(), etc..
-    const name = node.callee.property.name;
-    if (name === 'instanceOf') {
-      returnValue = j.genericTypeAnnotation(node.arguments[0], null);
-    } else if (name === 'arrayOf') {
-      returnValue = j.genericTypeAnnotation(
-        j.identifier('Array'),
-        j.typeParameterInstantiation([
-          propTypeToFlowType(
-            j,
-            null,
-            node.arguments[0] || j.anyTypeAnnotation()
-          ),
-        ])
-      );
-    } else if (name === 'objectOf') {
-      // TODO: Is there a direct Flow translation for this?
-      returnValue = j.genericTypeAnnotation(
-        j.identifier('Object'),
-        j.typeParameterInstantiation([
-          propTypeToFlowType(
-            j,
-            null,
-            node.arguments[0] || j.anyTypeAnnotation()
-          ),
-        ])
-      );
-    } else if (name === 'shape') {
+  switch (node.type) {
+    case NODE_TYPES.STRING_LITERAL:
+      returnValue = j.stringLiteralTypeAnnotation(node.value, node.extra.raw);
+      break;
+
+    case NODE_TYPES.IDENTIFIER:
+      returnValue = j.genericTypeAnnotation(node, null);
+      break;
+
+    case EXPRESSION_TYPES.MEMBER_EXPRESSION:
+      returnValue = TRANSFORM_MAP[node.property.name];
+      break;
+
+    case EXPRESSION_TYPES.CALL_EXPRESSION:
+      returnValue = propTypeToFlowTypeTransform(j, node, propTypeToFlowType);
+      break;
+
+    case EXPRESSION_TYPES.OBJECT_EXPRESSION:
       returnValue = j.objectTypeAnnotation(
-        node.arguments[0].properties.map(arg =>
-          propTypeToFlowType(j, arg.key, arg.value)
-        )
+        node.arguments.map(arg => propTypeToFlowType(j, arg.key, arg.value))
       );
-    } else if (name === 'oneOfType' || name === 'oneOf') {
-      returnValue = j.unionTypeAnnotation(
-        node.arguments[0].elements.map(arg => propTypeToFlowType(j, null, arg))
-      );
-    }
-  } else if (node.type === 'ObjectExpression') {
-    returnValue = j.objectTypeAnnotation(
-      node.arguments.map(arg => propTypeToFlowType(j, arg.key, arg.value))
-    );
-  } else if (node.type === 'Identifier') {
-    returnValue = j.genericTypeAnnotation(node, null);
+      break;
+
+    default:
+      break;
   }
 
   // finally return either an objectTypeProperty or just a property if `key` is null
